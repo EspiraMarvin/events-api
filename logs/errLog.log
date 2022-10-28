@@ -1,0 +1,5 @@
+20221024	14:11:23	9b4d6c78-891a-48f5-807e-ae05c326cc88	TypeError: Converting circular structure to JSON
+24	14:49:21	e7928842-a6b6-48e7-97ff-e2d100a8afcc	ReferenceError: Cannot access 'cookie' before initialization	POST	/auth/register	undefined
+20221024	18:07:48	b5e38165-e9f2-447b-a23b-bc5201c4a7fa	ReferenceError: asyncHandler is not defined	GET	/auth/refresh	undefined
+20221024	18:09:48	f57523c0-ba4c-4cf9-9e1b-a61049eae491	ReferenceError: asyncHandler is not defined	GET	/auth/refresh	undefined
+20221024	18:09:49	3f3f30f6-937b-4aca-ad95-6af7a177801d	ReferenceError: asyncHandler is not defined	GET	/auth/refresh	undefined
