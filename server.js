@@ -19,7 +19,7 @@ const corsOptions = require("./config/corsOrigin")
 // db connection
 const connectDb = require("./config/dbConn")
 const mongoose = require("mongoose")
-const PORT = process.env.PORT || 4000
+const PORT = process.env.PORT || 5000
 connectDb()
 
 // save logs to file middleware
@@ -36,7 +36,7 @@ app.use(cookieParser())
 app.use("/", express.static(path.join(__dirname, "/public")))
 
 app.use("/", require("./routes/root"))
-app.use("/auth", require("./routes/authRoutes"))
+app.use("/api/auth", require("./routes/authRoutes"))
 app.use("/api/users", require("./routes/userRoutes"))
 app.use("/api/events", require("./routes/eventRoutes"))
 

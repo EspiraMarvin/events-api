@@ -12,14 +12,18 @@ const generateAuthToken = require("../utils/generateAuthToken")
  */
 
 const register = async (req, res) => {
+  console.log("req body", req.body)
+
   const { email, password } = req.body
+  console.log("email", email)
+  console.log("password", password)
 
   if (!email || !password)
     return res.status(400).json({ message: "All fields are required" })
 
   const schema = Joi.object({
     email: Joi.string().min(3).max(200).required().email(),
-    password: Joi.string().min(6).max(200).required(),
+    password: Joi.string().min(5).max(200).required(),
   })
 
   const { error } = schema.validate(req.body)
@@ -57,11 +61,12 @@ const register = async (req, res) => {
     // create secure cookie with refresh token
     res.cookie("jwt", refreshToken, {
       httpOnly: false, // accessible only by web server when its true
-      secure: false, // https when its true
+      secure: process.env.NODE_ENV !== "development", // https when its true
       sameSite: "None", // cross-site cookie
-    path: '/', // by setting path '/' it will persist across all browsers
+      path: "/", // by setting path '/' it will persist across all browsers
       maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry: set to match 7 days
     })
+    console.log("access token user registered", accessToken)
     res.json({ accessToken })
   } else {
     res.status(400).json({ message: "Invalid user data received" })
@@ -91,9 +96,9 @@ const login = async (req, res) => {
   // create secure cookie with refresh token
   res.cookie("jwt", refreshToken, {
     httpOnly: false, // accessible only by web server when its true
-    secure: false, // https
+    secure: process.env.NODE_ENV !== "development", // https
     sameSite: "None", // cross-site cookie
-    path: '/', // by setting path '/' it will persist across all browsers
+    path: "/", // by setting path '/' it will persist across all browsers
     maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry: set to match 7 days
   })
 
@@ -113,7 +118,7 @@ const refresh = (req, res) => {
   jwt.verify(
     refreshToken,
     process.env.REFRESH_TOKEN_SECRET,
-    (async (err, decoded) => {
+    async (err, decoded) => {
       if (err) return res.status(403).json({ message: "Forbidden" })
 
       const foundUser = await User.findOne({ email: decoded.email })
@@ -132,7 +137,7 @@ const refresh = (req, res) => {
       )
 
       res.json({ accessToken })
-    })
+    }
   )
 }
 
@@ -142,7 +147,12 @@ const refresh = (req, res) => {
 const logout = (req, res) => {
   const cookies = req.cookies
   if (!cookies?.jwt) return res.sendStatus(204) // No content
-  res.clearCookie("jwt", { httpOnly: false, sameSite: "None", secure: false, path: '/' })
+  res.clearCookie("jwt", {
+    httpOnly: false,
+    sameSite: "None",
+    secure: process.env.NODE_ENV !== "development",
+    path: "/",
+  })
   res.json({ message: "Cookie cleared" })
 }
 
