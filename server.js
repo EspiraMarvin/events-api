@@ -1,7 +1,6 @@
-require("dotenv").config()
-require("express-async-errors")
-
 const express = require("express")
+require("express-async-errors")
+require("dotenv").config()
 const app = express()
 const path = require("path")
 
@@ -39,7 +38,6 @@ app.use("/", require("./routes/root"))
 app.use("/api/auth", require("./routes/authRoutes"))
 app.use("/api/users", require("./routes/userRoutes"))
 app.use("/api/events", require("./routes/eventRoutes"))
-
 
 app.all("*", (req, res) => {
   // 404 not found error
