@@ -27,7 +27,7 @@ const register = async (req, res) => {
   })
 
   const { error } = schema.validate(req.body)
-  console.log("errir at joi schema validation", error)
+  console.log("error at joi schema validation", error)
 
   if (error) return res.status(400).send(error.details[0].message)
 

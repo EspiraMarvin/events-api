@@ -1,71 +1,87 @@
-const User = require('../models/User')
-const bcrypt = require('bcrypt')
+const User = require("../models/User")
+const bcrypt = require("bcrypt")
 
 // @desc Get al users
 // @router GET /users
 // @ccess Private
 const getAllUsers = async (req, res) => {
-    const users = await User.find().select('-password').lean()    // lean() does not return the methods attached to User model // select('-password') means dont return users with passwords 
-    if (!users?.length) return res.status(400).json({ message: "No Users Found" })
-    res.json(users)
+  const users = await User.find().select("-password").lean() // lean() does not return the methods attached to User model // select('-password') means dont return users with passwords
+  if (!users?.length) return res.status(400).json({ message: "No Users Found" })
+  res.json(users)
 }
 
+// @desc Get user profile
+// @router GET /users/:email
+// @ccess Private
+const getUserProfile = async (req, res) => {
+  console.log("getUserProfile req", req)
+
+  const email = req.param.email
+  console.log("user req param found", req.param.email)
+
+  const user = await User.find({ email: email }).lean()
+  console.log("user found", user)
+}
 
 // @desc Update a user
 // @router PATCH /users
 // @ccess Private
 const updateUser = async (req, res) => {
-    const { id, email, roles, active, password } = req.body
-    
-    // confirm data
-    if (!id || !email || !Array.isArray(roles) || !roles.length) {
-        return res.status(400).json({ message: 'All fields except password are required' })          // 400 bad req
-    }
+  const { id, email, roles, active, password } = req.body
 
-     // Does the user exist to update?
-    const user = await User.findById(id).exec()
-    
-    if (!user) return res.status(400).json({ message: 'User not found' })
+  // confirm data
+  if (!id || !email || !Array.isArray(roles) || !roles.length) {
+    return res
+      .status(400)
+      .json({ message: "All fields except password are required" }) // 400 bad req
+  }
 
-    // check for duplicate
-    const duplicate = await User.findOne({ username }).collation({ locale: 'en', strength: 2}).lean().exec()
-    
-    // Allow updates to the original user -- update the user with the id passed to req body only and not any other duplicate username incase exists
-    if (duplicate && duplicate?._id.toString() !== id) {
-        return res.status(409).json({ message: 'Duplicate username' })
-    }
+  // Does the user exist to update?
+  const user = await User.findById(id).exec()
 
-    user.email = email
-    user.roles = roles
+  if (!user) return res.status(400).json({ message: "User not found" })
 
-    if (password) {
-        // hash password
-        user.password = await bcrypt.hash(password, 10)
-    }
+  // check for duplicate
+  const duplicate = await User.findOne({ username })
+    .collation({ locale: "en", strength: 2 })
+    .lean()
+    .exec()
 
-    const updatedUser = await user.save()
+  // Allow updates to the original user -- update the user with the id passed to req body only and not any other duplicate username incase exists
+  if (duplicate && duplicate?._id.toString() !== id) {
+    return res.status(409).json({ message: "Duplicate username" })
+  }
 
-    res.json({ message: `${updatedUser.username} updated` })
+  user.email = email
+  user.roles = roles
 
+  if (password) {
+    // hash password
+    user.password = await bcrypt.hash(password, 10)
+  }
+
+  const updatedUser = await user.save()
+
+  res.json({ message: `${updatedUser.username} updated` })
 }
 
 // @desc Delete a user
 // @router DELETE /users
 // @ccess Private
 const deleteUser = async (req, res) => {
-    const { id } = req.body
-    
-    if (!id) return res.status(400).json({ message: 'User ID Required '})
+  const { id } = req.body
 
-    const user = await User.findById(id).exec()
+  if (!id) return res.status(400).json({ message: "User ID Required " })
 
-    if (!user) return res.status(400).json({ message: 'User not found' })
+  const user = await User.findById(id).exec()
 
-    const result = await user.deleteOne()
+  if (!user) return res.status(400).json({ message: "User not found" })
 
-    const reply = `Username ${result.username} with ID ${result._id} deleted`
+  const result = await user.deleteOne()
 
-    res.json(reply)
+  const reply = `Username ${result.username} with ID ${result._id} deleted`
+
+  res.json(reply)
 }
 
-module.exports = { getAllUsers, updateUser, deleteUser }
+module.exports = { getAllUsers, getUserProfile, updateUser, deleteUser }
