@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 5000
 connectDb()
 
 // save logs to file middleware
-app.use(logger)
+// app.use(logger)
 
 app.use(cors(corsOptions))
 // middleware to use json
